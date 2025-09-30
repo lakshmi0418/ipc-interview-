@@ -39,5 +39,113 @@ int main() {
 Created using mkfifo() or the shell command mkfifo.
 
 Supports one-way communication unless two FIFOs are used.
+Created using mkfifo() and accessed using standard file operations (open, read, write).
+
+It follows First In First Out — the first data written is the first to be read.
+fifowrite.c
+#include <stdio.h>
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <unistd.h>
+
+int main() {
+    int fd;
+    char *fifo = "/tmp/myfifo";
+
+    // Create the FIFO (named pipe)
+    mkfifo(fifo, 0666);
+
+    // Open FIFO for writing
+    fd = open(fifo, O_WRONLY);
+    write(fd, "Hello from writer!", 19);
+    close(fd);
+
+    return 0;
+}
+fiforead.c
+#include <stdio.h>
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <unistd.h>
+
+int main() {
+    int fd;
+    char buffer[100];
+    char *fifo = "/tmp/myfifo";
+
+    // Open FIFO for reading
+    fd = open(fifo, O_RDONLY);
+    read(fd, buffer, sizeof(buffer));
+    printf("Reader received: %s\n", buffer);
+    close(fd);
+
+    return 0;
+}
+
+MESSAGEQUEUE:Allows one or more processes to send and receive structured messages (not just bytes).
+
+Messages are stored in a queue until they are retrieved.
+
+e’ll create:
+
+Sender process (writes a message)
+
+Receiver process (reads the message)
+Created and accessed using msgget(), msgsnd(), msgrcv(), and messages are retrieved based on message type.
+// msg_struct.h
+#define MAX_TEXT 100
+
+struct msg_buffer {
+    long msg_type;
+    char msg_text[MAX_TEXT];
+};
+#include <stdio.h>
+#include <sys/ipc.h>
+#include <sys/msg.h>
+#include "msg_struct.h"
+
+int main() {
+    key_t key;
+    int msgid;
+    struct msg_buffer msg;
+
+    key = ftok("progfile", 65);              // Generate unique key
+    msgid = msgget(key, 0666 | IPC_CREAT);   // Create message queue
+
+    msg.msg_type = 1;
+    printf("Enter message: ");
+    fgets(msg.msg_text, MAX_TEXT, stdin);
+
+    msgsnd(msgid, &msg, sizeof(msg.msg_text), 0);  // Send message
+    printf("Message sent.\n");
+
+    return 0;
+}
+#include <stdio.h>
+#include <sys/ipc.h>
+#include <sys/msg.h>
+#include "msg_struct.h"
+
+int main() {
+    key_t key;
+    int msgid;
+    struct msg_buffer msg;
+
+    key = ftok("progfile", 65);             // Generate same key
+    msgid = msgget(key, 0666 | IPC_CREAT);  // Access message queue
+
+    msgrcv(msgid, &msg, sizeof(msg.msg_text), 1, 0);  // Receive message
+
+    printf("Received message: %s\n", msg.msg_text);
+
+    // Delete message queue
+    msgctl(msgid, IPC_RMID, NULL);
+
+    return 0;
+}
+
+
+
+
     return 0;
 }
