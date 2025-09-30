@@ -152,5 +152,58 @@ Mailbox allows one task to send a message and another task to receive it.
 Usually used in RTOS like FreeRTOS, Keil RTX, ThreadX,
 It ensures safe communication and synchronization between producer and consumer tasks
 Real-World Use Case
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <mqueue.h>
+
+#define QUEUE_NAME  "/my_mailbox"
+#define MAX_SIZE    1024
+
+int main() {
+    mqd_t mq;
+    char buffer[MAX_SIZE];
+
+    mq = mq_open(QUEUE_NAME, O_WRONLY | O_CREAT, 0644, NULL);
+    if (mq == -1) {
+        perror("mq_open");
+        exit(1);
+    }
+
+    snprintf(buffer, MAX_SIZE, "Hello from sender!");
+    mq_send(mq, buffer, strlen(buffer) + 1, 0);
+
+    printf("Message sent: %s\n", buffer);
+    mq_close(mq);
+    return 0;
+}
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <mqueue.h>
+
+#define QUEUE_NAME  "/my_mailbox"
+#define MAX_SIZE    1024
+
+int main() {
+    mqd_t mq;
+    char buffer[MAX_SIZE];
+
+    mq = mq_open(QUEUE_NAME, O_RDONLY);
+    if (mq == -1) {
+        perror("mq_open");
+        exit(1);
+    }
+
+    mq_receive(mq, buffer, MAX_SIZE, NULL);
+    printf("Message received: %s\n", buffer);
+
+    mq_close(mq);
+    mq_unlink(QUEUE_NAME);  // Remove the queue
+    return 0;
+}
+
+
+
 
 For example, a sensor task sends temperature data to a processing task via a mailbox — each reading is a message.
