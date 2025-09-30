@@ -1,6 +1,6 @@
 IPC-MECHANISM
 PIPE:
-Pipes allow one-way communication between parent and child processes.
+1Pipes allow one-way communication between parent and child processes.
 
 Use pipe(), fork(), read(), and write() for communication.
 Pipes allow one-way communication between parent and child processes.
@@ -138,14 +138,19 @@ int main() {
 
     printf("Received message: %s\n", msg.msg_text);
 
-    // Delete message queue
+    // Delete message queueA 
     msgctl(msgid, IPC_RMID, NULL);
 
     return 0;
 }
 
+MAILBOX:
 
+mailbox is an inter-task communication (IPC) mechanism used in real-time operating systems (RTOS) that allows tasks (or threads) to send and receive fixed-size messages,
+Mailbox allows one task to send a message and another task to receive it.
 
+Usually used in RTOS like FreeRTOS, Keil RTX, ThreadX,
+It ensures safe communication and synchronization between producer and consumer tasks
+Real-World Use Case
 
-    return 0;
-}
+For example, a sensor task sends temperature data to a processing task via a mailbox — each reading is a message.
