@@ -1,4 +1,7 @@
-IPC-MECHANISM
+IPC-MECHANISM:
+Direct task notifications are a lightweight, fast method for task-to-task or ISR-to-task communication in FreeRTOS.
+They can be used as a binary semaphore, counting semaphore, or event flag, using just a single 32-bit value per task.
+
 PIPE:
 1Pipes allow one-way communication between parent and child processes.
 
